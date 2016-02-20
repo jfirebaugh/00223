@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset=utf-8 />
+  <title>A simple map</title>
+  <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+  <script src='https://api.mapbox.com/mapbox.js/v2.3.0/mapbox.js'></script>
+  <link href='https://api.mapbox.com/mapbox.js/v2.3.0/mapbox.css' rel='stylesheet' />
+  <script src='leaflet-locationfilter/locationfilter.js'></script>
+  <link href='leaflet-locationfilter/locationfilter.css' rel='stylesheet' />
+  <script src='bundle.js'></script>
+  <style>
+    body { margin:0; padding:0; }
+    #map { position:absolute; top:0; bottom:0; width:100%; }
+    #output { background-color: white; padding: 0.5em; position:absolute; bottom:10px; left:10px; width: 200px; }
+  </style>
+</head>
+<body>
+<div id='map'></div>
+<div id='output'>
+  <a href="#" onclick="preset([37.2, -122.8], [38.1, -121.7])">Bay Area</a><br>
+  <a href="#" onclick="preset([42.165, -71.229], [42.482, -70.845])">Boston</a><br>
+  <a href="#" onclick="preset([51.1586, -0.8953], [51.8459, 0.6893])">London</a><br>
+  <a href="#" onclick="preset([31.6977, 35.1335], [31.8967, 35.3141])">Jerusalem</a><br>
+  MinZ: <input type="number" name="minZ" value="0"/><br>
+  MaxZ: <input type="number" name="maxZ" value="15"/><br>
+  Tile count: <span id="result"></span>
+</div>
+<script>
+  L.mapbox.accessToken = 'pk.eyJ1IjoiamZpcmUiLCJhIjoiVkRqZHhXTSJ9.k3r6TYm9oetgLQX0A_nQbQ';
+  var map = L.mapbox.map('map', 'mapbox.streets')
+    .setView([31, -98], 3);
+
+  var locationFilter = new L.LocationFilter()
+    .addTo(map);
+
+  locationFilter.on('change', change);
+  document.querySelector('[name="minZ"]').addEventListener('change', change);
+  document.querySelector('[name="maxZ"]').addEventListener('change', change);
+
+  function preset(min, max) {
+    var bounds = L.latLngBounds(min, max);
+    locationFilter.setBounds(bounds);
+    locationFilter.enable();
+    map.fitBounds(bounds);
+    change();
+  }
+
+  function change() {
+    document.querySelector('#result').textContent = tileCount(
+      locationFilter.getBounds(),
+      +document.querySelector('[name="minZ"]').value,
+      +document.querySelector('[name="maxZ"]').value);
+  }
+
+  preset([37.2, -122.8], [38.1, -121.7]);
+</script>
+</body>
+</html>
